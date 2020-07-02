@@ -1,11 +1,14 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
 
-//const {index, getUserById, createUser, updateUser, deleteUser} = require('../controllers/userController')
-const {index, getUserById, createUser} = require('../controllers/userController')
+//const {index, getPostById, createPost, updatePost, deletePost} = require('../controllers/postController')
+const {addUserAPI, delUserAPI, getUserAllAPI, updatelUserAPI} = require('../controllers/userController')
+const router = express.Router()
 
-router.get('/', index)
-router.get('/:id', getUserById)
-router.post('/', createUser)
+//
+
+router.get('/User/all', getUserAllAPI)
+router.post('/User/:num1', addUserAPI)
+router.delete('/User/:num1', delUserAPI)
+router.put('/User/:numOld/:numNew', updatelUserAPI)
 
 module.exports = router
