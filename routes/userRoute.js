@@ -1,14 +1,24 @@
 const express = require('express')
-
-//const {index, getPostById, createPost, updatePost, deletePost} = require('../controllers/postController')
-const {addUserAPI, delUserAPI, getUserAllAPI, updatelUserAPI} = require('../controllers/userController')
 const router = express.Router()
+const userController   = require('../controllers/userController')
 
-//
 
-router.get('/User/all', getUserAllAPI)
-router.post('/User/:num1', addUserAPI)
-router.delete('/User/:num1', delUserAPI)
-router.put('/User/:numOld/:numNew', updatelUserAPI)
+//GET localhost:3000/api/user/
+router.get('/', userController.index)
+
+//GET localhost:3000/api/user/xxxxxxxxxxx
+router.get('/:id', userController.getUserById)
+
+//POST
+router.post('/', userController.createUserAPI)
+
+//PUT localhost:3000/api/user/xxxxxxxxxxxx {BODY}
+router.put('/:id', userController.updateUser)
+
+//PATCH localhost:3000/api/post/xxxxxxxxxxxx {BODY}
+router.patch('/:id', userController.updateUserSome)
+
+// DELETED localhost:3000/api/user/xxxxxxxxxxxx
+router.delete('/:id', userController.deleteUser)
 
 module.exports = router

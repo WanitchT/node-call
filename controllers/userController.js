@@ -1,46 +1,136 @@
-let arrUser = []
-module.exports.getUserAllAPI = (req, res) => {
-    console.log("=== getUserAllAPI ===");
-    //let arrUser = []
-    console.log(arrUser);
-    res.status(201).json(arrUser)
+const mongoose = require('mongoose');
+const User = require('../models/userModel');
+
+
+module.exports.index = async function (req, res) {
+    
+    try {
+        // select * from user; 
+        const users = await User.find();
+        res.status(200).json({
+            data: users
+        });
+       
+    } catch (err) {
+        res.status(500).json(
+            {
+                errors: err
+            });
+    }
 }
 
-module.exports.addUserAPI = (req, res) => {
-    console.log("=== addUserAPI ===");
-    //let arrUser = []
-    arrUser.push(req.params.num1)
-    console.log(arrUser);
-    res.status(201).json(arrUser)
+
+module.exports.getUserById = async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findOne({ _id: id });
+    res.status(200).json({ data: { user } });
+    // try {
+
+    // } catch () {
+        
+    // }
 }
 
-module.exports.delUserAPI = (req, res) => {
-    console.log("=== delUserAPI ===");
-    //let arrUser = []
-    const index = arrUser.indexOf(req.params.num1);
-        if (index > -1) {
-            arrUser.splice(index, 1);
-        }
-    console.log(arrUser);
-    res.status(201).json(arrUser)
-}
 
-module.exports.updatelUserAPI = (req, res) => {
-    console.log("=== updatelUserAPI ===");
-    //let arrUser = []
-    const index = arrUser.indexOf(req.params.numOld);
-        if (index > -1) {
-            arrUser.splice(index, 1);
-        }
-        arrUser.push(req.params.numNew)
-    console.log(arrUser);
-    res.status(201).json(arrUser)
-}
-
-module.exports.createPostAPI = (req, res) => {
-    console.log("=== createPostAPI ===");
+module.exports.createUserAPI = async (req, res) => {
     console.log(req.body);
-    const {title} = req.body;
-    console.log(`Title : ${title}`);
-    res.status(201).json(req.body);
+    const { name ,email} = req.body;
+    console.log(`name : ${name}`);
+    let user = new User({
+        name: name,
+        email : email
+    });
+
+    try {
+        //save : mongoose command
+        await user.save();
+        res.status(201).json({ data: { user } });
+    } catch (err) {
+        res.status(500).json({
+            errors: { err }
+        });
+    }
+}
+
+module.exports.updateUser = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+        const { name } = req.body;
+        console.log(req.body);
+        console.log(`Id : ${req.params.id}`);
+        console.log(`name : ${name}`);
+        const user = await User.updateOne({ _id: id },
+            { name: name }
+        );
+
+        if (user.nModified === 0) {
+            throw new Error('Cannot update');
+        } else {
+            res.status(201).json(
+                {
+                    message: "Update completed",
+                    success: true
+                });
+        }
+    } catch (err) {
+        res.status(500).json({
+            error: [{
+                code: 500,
+                message: err.message
+            }]
+        });
+    }
+}
+
+module.exports.updateUserSome = async (req, res) => {
+
+    try {
+        console.log(req.body);
+        const { id } = req.params;
+        const { name } = req.body;
+
+        console.log(`Id : ${id}`);
+        const user = await User.findByIdAndUpdate(id, {
+            name: name
+        });
+
+        console.log(`user : ${user}`);
+
+        if (!user) {
+            throw new Error('Notthing to update');
+        } else {
+            res.status(201).json({ data: { user } });
+        }
+
+    } catch (err) {
+        res.status(500).json({
+            errors: {
+                code: 500,
+                message: err.message
+            }
+        });
+    }
+}
+
+module.exports.deleteUser = async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id)
+        if (!user) {
+            res.status(404).json({ errors: { err } });
+        }
+        res.status(200).json(
+            {
+                message: "Delete completed",
+                success: true
+            });
+    } catch (err) {
+        res.status(500).json({
+            errors: {
+                code: 500,
+                message: "Cannot delete"
+            }
+        })
+    }
 }

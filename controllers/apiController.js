@@ -1,93 +1,136 @@
+const mongoose = require('mongoose');
+const User = require('../models/userModel');
 
-module.exports.index =  function (req, res) {
-    res.status(200).json("Get Index");
+
+module.exports.index = async function (req, res) {
+    
+    try {
+        // select * from user; 
+        const users = await User.find();
+        res.status(200).json({
+            data: users
+        });
+       
+    } catch (err) {
+        res.status(500).json(
+            {
+                errors: err
+            });
+    }
 }
 
-module.exports.getAPIById = (req, res) => {
-    res.status(200).json("Get by ID")
+
+module.exports.getUserById = async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findOne({ _id: id });
+    res.status(200).json({ data: { user } });
+    // try {
+
+    // } catch () {
+        
+    // }
 }
 
-module.exports.getStaticAPI = (req, res) => {
-    console.log("=== getStaticAPI ===");
-    res.status(200).json("Hello World")
-}
 
-module.exports.getStaticJSONAPI = (req, res) => {
-    console.log("=== getStaticJSONAPI ===");
-    res.status(201).json(req.body);
-}
-
-module.exports.getEchoAPI = (req, res) => {
-    console.log("=== getEchoAPI ===");
-    res.status(201).send(req.query.text)
-}
-
-module.exports.getPlusAPI = (req, res) => {
-    console.log("=== getPlusAPI ===");
-    let numPlus = Number(req.query.a) + Number(req.query.b)
-    console.log(numPlus);
-    res.status(201).send(`${numPlus}`)
-}
-
-module.exports.getPlusByJSONAPI = (req, res) => {
-    console.log("=== getPlusByJSONAPI ===");
-    console.log(req.query.jsonText);
-    let obj = JSON.parse(req.query.jsonText);
-    let numPlus = Number(obj.a) + Number(obj.b)
-    console.log(numPlus);
-    res.status(201).send(`${numPlus}`)
-}
-
-module.exports.getPlusSubAPI = (req, res) => {
-    console.log("=== getPlusSubAPI ===");
-    let numPlus = Number(req.params.num1) + Number(req.params.num2)
-    console.log(numPlus);
-    res.status(201).send(`${numPlus}`)
-}
-
-let arrNumber = []
-module.exports.getNumberAllAPI = (req, res) => {
-    console.log("=== getNumberAllAPI ===");
-    //let arrNumber = []
-    console.log(arrNumber);
-    res.status(201).json(arrNumber)
-}
-
-module.exports.addNumberAPI = (req, res) => {
-    console.log("=== addNumberAPI ===");
-    //let arrNumber = []
-    arrNumber.push(req.params.num1)
-    console.log(arrNumber);
-    res.status(201).json(arrNumber)
-}
-
-module.exports.delNumberAPI = (req, res) => {
-    console.log("=== delNumberAPI ===");
-    //let arrNumber = []
-    const index = arrNumber.indexOf(req.params.num1);
-        if (index > -1) {
-            arrNumber.splice(index, 1);
-        }
-    console.log(arrNumber);
-    res.status(201).json(arrNumber)
-}
-
-module.exports.updatelNumberAPI = (req, res) => {
-    console.log("=== updatelNumberAPI ===");
-    //let arrNumber = []
-    const index = arrNumber.indexOf(req.params.numOld);
-        if (index > -1) {
-            arrNumber.splice(index, 1);
-        }
-        arrNumber.push(req.params.numNew)
-    console.log(arrNumber);
-    res.status(201).json(arrNumber)
-}
-
-module.exports.createPostAPI = (req, res) => {
-    console.log("=== createPostAPI ===");
+module.exports.createUserAPI = async (req, res) => {
     console.log(req.body);
-    const {title} = req.body;
-    console.log(`Title : ${title}`);
-    res.status(201).json(req.body);
+    const { name ,email} = req.body;
+    console.log(`name : ${name}`);
+    let user = new User({
+        name: name,
+        email : email
+    });
+
+    try {
+        //save : mongoose command
+        await user.save();
+        res.status(201).json({ data: { user } });
+    } catch (err) {
+        res.status(500).json({
+            errors: { err }
+        });
+    }
+}
+
+module.exports.updateUser = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+        const { name } = req.body;
+        console.log(req.body);
+        console.log(`Id : ${req.params.id}`);
+        console.log(`name : ${name}`);
+        const user = await User.updateOne({ _id: id },
+            { name: name }
+        );
+
+        if (user.nModified === 0) {
+            throw new Error('Cannot update');
+        } else {
+            res.status(201).json(
+                {
+                    message: "Update completed",
+                    success: true
+                });
+        }
+    } catch (err) {
+        res.status(500).json({
+            error: [{
+                code: 500,
+                message: err.message
+            }]
+        });
+    }
+}
+
+module.exports.updateUserSome = async (req, res) => {
+
+    try {
+        console.log(req.body);
+        const { id } = req.params;
+        const { name } = req.body;
+
+        console.log(`Id : ${id}`);
+        const user = await User.findByIdAndUpdate(id, {
+            name: name
+        });
+
+        console.log(`user : ${user}`);
+
+        if (!user) {
+            throw new Error('Notthing to update');
+        } else {
+            res.status(201).json({ data: { user } });
+        }
+
+    } catch (err) {
+        res.status(500).json({
+            errors: {
+                code: 500,
+                message: err.message
+            }
+        });
+    }
+}
+
+module.exports.deleteUser = async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id)
+        if (!user) {
+            res.status(404).json({ errors: { err } });
+        }
+        res.status(200).json(
+            {
+                message: "Delete completed",
+                success: true
+            });
+    } catch (err) {
+        res.status(500).json({
+            errors: {
+                code: 500,
+                message: "Cannot delete"
+            }
+        })
+    }
 }

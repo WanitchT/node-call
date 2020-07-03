@@ -1,28 +1,21 @@
 const express = require('express')
-
-//const {index, getPostById, createPost, updatePost, deletePost} = require('../controllers/postController')
-const {index, getAPIById, createPostAPI, getStaticAPI, getStaticJSONAPI, getEchoAPI, getPlusAPI,getPlusByJSONAPI, 
-    getPlusSubAPI, addNumberAPI, delNumberAPI, getNumberAllAPI, updatelNumberAPI} = require('../controllers/apiController')
 const router = express.Router()
+const apiController   = require('../controllers/apiController')
 
 
-router.get('/static', getStaticAPI)
-router.get('/staticJSON', getStaticJSONAPI)
-router.get('/echo', getEchoAPI)
-router.get('/plus', getPlusAPI)
-router.get('/plus/:num1/:num2', getPlusSubAPI)
-router.get('/plusByJSON', getPlusByJSONAPI)
+//GET localhost:3000/api/user/
+router.get('/', apiController.index)
 
-//
+//GET localhost:3000/api/user/xxxxxxxxxxx
+router.get('/:id', apiController.getUserById)
 
-router.get('/number/all', getNumberAllAPI)
-router.post('/number/:num1', addNumberAPI)
-router.delete('/number/:num1', delNumberAPI)
-router.put('/number/:numOld/:numNew', updatelNumberAPI)
+//POST
+router.post('/', apiController.createUserAPI)
 
-router.get('/', index)
-router.get('/:id', getAPIById)
-router.post('/', createPostAPI)
+//PUT localhost:3000/api/user/xxxxxxxxxxxx {BODY}
+router.put('/:id', apiController.updateUser)
 
+// DELETED localhost:3000/api/user/xxxxxxxxxxxx
+router.delete('/:id', apiController.deleteUser)
 
 module.exports = router
